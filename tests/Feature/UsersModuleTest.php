@@ -84,5 +84,113 @@ class UsersModuleTest extends TestCase
         ]);
     }
 
+    /** @test */
+    function the_name_is_required() 
+    {
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => '',
+            'email' => 'dani@gmail.com',
+            'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['name' => 'El campo nombre es obligatorio']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'daniel@gmail.com'
+        ]);
+
+    }
+
+    /** @test */
+    function the_email_is_required() 
+    {
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => 'Daniel',
+            'email' => '',
+            'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(0, User::count());
+
+    }
+
+    /** @test */
+    function the_password_is_required() 
+    {
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => 'Daniel',
+            'email' => 'daniel@gmail.com',
+            'password' => ''
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['password']);
+
+        $this->assertEquals(0, User::count());
+
+    }
+
+    /** @test */
+    function the_email_must_be_valid() 
+    {
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => 'Daniel',
+            'email' => 'email-no-valido',
+            'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(0, User::count());
+
+    }
+
+    /** @test */
+    function the_email_must_be_unique() 
+    {
+        factory(User::class)->create([
+            'email' => 'daniel@gmail.com'
+        ]);
+
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => 'Daniel',
+            'email' => 'email-no-valido',
+            'password' => '123456'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['email']);
+
+        $this->assertEquals(1, User::count());
+
+    }
+
+    /** @test */
+    function the_password_must_have_six() 
+    {
+        //hacia donde nosotros enviamos la peticion
+        $this->from('usuarios/nuevo')
+            ->post('/usuarios/crear', [
+            'name' => 'Daniel',
+            'email' => 'email-no-valido',
+            'password' => '123'
+            ])
+            ->assertRedirect('usuarios/nuevo')
+            ->assertSessionHasErrors(['password']);
+
+        $this->assertEquals(0, User::count());
+
+    }
+
 
 }
