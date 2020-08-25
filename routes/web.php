@@ -22,16 +22,21 @@ Route::get('/', function () {
 Route::get('/usuarios', 'UserController@index')
     ->name('users.index');
 
+Route::get('/usuarios/{user}', 'UserController@show')
+    ->where('user', '[0-9]+') //expresion regular para controlar que solo sean numeros
+    ->name('users.show');
+
 Route::get('/usuarios/nuevo', 'UserController@create')
     ->name('users.create');
 
 Route::post('/usuarios/crear', 'UserController@store');
 
-Route::get('/usuarios/{user}', 'UserController@show')
-    ->where('user', '[0-9]+') //expresion regular para controlar que solo sean numeros
-    ->name('users.show');
+Route::get('/usuarios/{user}/editar', 'UserController@edit')
+->name('users.edit');
 
-Route::get('/usuarios/editar/{id}', 'UserController@editar')
-->where('id', '[0-9]+'); //expresion regular para controlar que solo sean numeros
+Route::put('/usuarios/{user}', 'UserController@update');
 
 Route::get('saludo/{name}/{nickname?}', 'WelcomeUserController');
+
+Route::delete('/usuarios/{user}', 'UserController@destroy')
+    ->name('users.destroy');
